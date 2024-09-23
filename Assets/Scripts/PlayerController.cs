@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using MEC;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -10,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public Animator animator;
     public AnimationClip idleClip;
     public AnimationClip walkClip;
-    public AnimationClip oneShotClip;
+    public AnimationClip runningClip;
     public AnimationSystem animationSystem;
     
 
@@ -24,7 +22,7 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
-        animationSystem = new AnimationSystem(animator, idleClip, walkClip);
+        animationSystem = new AnimationSystem(animator, idleClip, walkClip, runningClip);
     }
 
     void Update()
@@ -33,19 +31,12 @@ public class PlayerController : MonoBehaviour
         
         a = Math.Clamp(1 - Weight * 2.0f, 0, 1);
         b = Math.Clamp(Weight * 2.0f, 0, 1);
-        
         c = Math.Clamp(Weight * (int)Math.Floor(b) , 0, 1);
     }
 
     private void OnDestroy()
     {
         animationSystem.Destroy();
-    }
-
-    [ContextMenu("Play One Shot Animaton")]
-    public void PlayOneShot()
-    {
-        animationSystem.PlayOneShot(oneShotClip, 5.0f);
     }
 }
 
@@ -54,27 +45,26 @@ public class AnimationSystem
 {
     private PlayableGraph graph;
     private AnimationMixerPlayable topLevelMixer;
-    private AnimationMixerPlayable locomotionMixer;
 
-    public AnimationSystem(Animator animator, AnimationClip idleClip, AnimationClip walkClip)
+    public AnimationSystem(Animator animator, AnimationClip idleClip, AnimationClip walkClip, AnimationClip runningClip)
     {
         graph = PlayableGraph.Create("Animation System");
 
         var animationOutput = AnimationPlayableOutput.Create(graph, "Animation System Output", animator);
 
-        topLevelMixer = AnimationMixerPlayable.Create(graph, 2);
-        locomotionMixer = AnimationMixerPlayable.Create(graph, 2);
+        topLevelMixer = AnimationMixerPlayable.Create(graph, 3);
 
         var idleClipPlayable = AnimationClipPlayable.Create(graph, idleClip);
         var walkClipPlayable = AnimationClipPlayable.Create(graph, walkClip);
+        var runningPlayable = AnimationClipPlayable.Create(graph, runningClip);
 
-        locomotionMixer.ConnectInput(0, idleClipPlayable, 0);
-        locomotionMixer.ConnectInput(1, walkClipPlayable, 0);
+        topLevelMixer.ConnectInput(0, idleClipPlayable, 0);
+        topLevelMixer.ConnectInput(1, walkClipPlayable, 0);
+        topLevelMixer.ConnectInput(2, runningPlayable, 0);
 
-        locomotionMixer.SetInputWeight(0, 1);
-        locomotionMixer.SetInputWeight(1, 0);
-
-        topLevelMixer.ConnectInput(0, locomotionMixer, 0);
+        topLevelMixer.SetInputWeight(0, 1);
+        topLevelMixer.SetInputWeight(1, 0);
+        topLevelMixer.SetInputWeight(2, 0);
 
         animationOutput.SetSourcePlayable(topLevelMixer);
 
@@ -83,11 +73,13 @@ public class AnimationSystem
 
     public void UpdateTopLevelMixer(float weight)
     {
+        topLevelMixer.SetInputWeight(0, Math.Clamp(1 - weight * 2.0f, 0, 1));
+        topLevelMixer.SetInputWeight(1, Math.Clamp(weight * 2.0f, 0, 1));
+        topLevelMixer.SetInputWeight(1, Math.Clamp(weight * (int)Math.Floor(Math.Clamp(weight * 2.0f, 0, 1)) , 0, 1));
+        
+        //weight = .5f;
         //0........5........1
         //I        W        R
-        locomotionMixer.SetInputWeight(0, 1 - weight);
-        locomotionMixer.SetInputWeight(1, weight);
-        weight = .5f;
         // 0. => 1 0 0
 
         // 0.125 => .75 .25 0
@@ -103,54 +95,6 @@ public class AnimationSystem
         // topLevelMixer.SetInputWeight(0, 1-weight*2.0f);
         // topLevelMixer.SetInputWeight(1, weight*2.0f);
         // topLevelMixer.SetInputWeight(1, 0);
-    }
-
-    public void PlayOneShot(AnimationClip oneShotClip, float v)
-    {
-        var oneShotPlayable = AnimationClipPlayable.Create(graph, oneShotClip);
-
-        topLevelMixer.ConnectInput(1, oneShotPlayable, 0);
-        topLevelMixer.SetInputWeight(0, 0);
-        topLevelMixer.SetInputWeight(1, 1);
-        
-        var blendDuration = 5.0f;
-        BlendIn(blendDuration);
-        BlendOut(blendDuration, oneShotClip.length - blendDuration);
-    }
-
-    private void BlendOut(float blendDuration, float delay)
-    {
-        Timing.RunCoroutine(BlendCoroutine(blendDuration,
-        blend => {
-            topLevelMixer.SetInputWeight(0, blend);
-            topLevelMixer.SetInputWeight(1, 1-blend);
-        }, delay));
-    }
-
-    private void BlendIn(float blendDuration)
-    {
-        Timing.RunCoroutine(BlendCoroutine(blendDuration,
-        blend => {
-            topLevelMixer.SetInputWeight(0, 1-blend);
-            topLevelMixer.SetInputWeight(1, blend);
-        }));
-    }
-
-    IEnumerator<float> BlendCoroutine(float duration, Action<float> blendCallback, float delay = 0, Action finishedAction = null)
-    {
-        if(delay > 0) Timing.WaitForSeconds(delay);
-
-        float step = 1 / duration;
-        float normaliseDuration = 0f;
-
-        while(normaliseDuration < 1)
-        {
-            normaliseDuration *= step * Time.deltaTime;
-            blendCallback(normaliseDuration);
-            yield return normaliseDuration;
-        }
-
-        finishedAction.Invoke();
     }
 
     public void Destroy()
