@@ -529,6 +529,11 @@ MonoBehaviour:
   m_CameraActivatedEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1179636658 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 5c9f53cdf5e05944dae50eac17c8563e, type: 3}
+  m_PrefabInstance: {fileID: 1273823406}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1273823406
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -581,10 +586,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 5c9f53cdf5e05944dae50eac17c8563e, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: c02335ccbd27e274caf29334f795097e, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5c9f53cdf5e05944dae50eac17c8563e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1880175162}
   m_SourcePrefab: {fileID: 100100000, guid: 5c9f53cdf5e05944dae50eac17c8563e, type: 3}
 --- !u!1 &1723252469
 GameObject:
@@ -663,6 +675,23 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5c9f53cdf5e05944dae50eac17c8563e, type: 3}
   m_PrefabInstance: {fileID: 1273823406}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1880175162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179636658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5c1f961ecb25c64cb3152b22a2cffd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  idleClip: {fileID: -203655887218126122, guid: f16c711ffd706134b8a738ce3927f09b, type: 3}
+  walkClip: {fileID: -203655887218126122, guid: 02cbf621a65460d4da611b0383bf6e28, type: 3}
+  runClip: {fileID: -203655887218126122, guid: 76261aef9a0eff449a16f2b6d639d765, type: 3}
+  Weight: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
