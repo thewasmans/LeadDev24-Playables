@@ -690,7 +690,6 @@ MonoBehaviour:
   animator: {fileID: 0}
   idleClip: {fileID: -203655887218126122, guid: f16c711ffd706134b8a738ce3927f09b, type: 3}
   walkClip: {fileID: -203655887218126122, guid: 02cbf621a65460d4da611b0383bf6e28, type: 3}
-  runClip: {fileID: -203655887218126122, guid: 76261aef9a0eff449a16f2b6d639d765, type: 3}
   Weight: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
